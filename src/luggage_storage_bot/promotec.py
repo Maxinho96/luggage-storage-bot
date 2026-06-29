@@ -76,7 +76,7 @@ def get_lockers_state() -> dict[int, bool]:
     return lockers
 
 
-def get_lockers_amount() -> float | None:
+def get_lockers_amount():
     session = requests.Session()
     tokens = authenticate(session)
 
