@@ -9,7 +9,7 @@ URL = "https://client.somee.com/"
 USER_AGENT = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/148.0.0.0 Safari/537.36"
 
 
-def authenticate(session: requests.Session):
+def authenticate(session: requests.Session) -> dict[str, str]:
     response = session.post(URL, timeout=10)
 
     user_payload = {
@@ -28,7 +28,8 @@ def authenticate(session: requests.Session):
 
     return get_tokens(password_response.text)
 
-def get_tokens(html_content):
+
+def get_tokens(html_content: str) -> dict[str, str]:
     soup = BeautifulSoup(html_content, "html.parser")
 
     viewstate_element = soup.find("input", {"id": "__VIEWSTATE"})
@@ -44,14 +45,11 @@ def get_tokens(html_content):
         "__EVENTVALIDATION": eventvalidation_value,
     }
 
-def get_lockers_state():
+
+def get_lockers_state() -> dict[int, bool]:
     session = requests.Session()
     tokens = authenticate(session)
-    payload = {
-        "__EVENTTARGET": "__Page",
-        "__EVENTARGUMENT": "PBArg",
-        **tokens
-    }
+    payload = {"__EVENTTARGET": "__Page", "__EVENTARGUMENT": "PBArg", **tokens}
     headers = {
         "user-agent": USER_AGENT,
     }
@@ -78,14 +76,11 @@ def get_lockers_state():
     return lockers
 
 
-def get_lockers_amount():
+def get_lockers_amount() -> float | None:
     session = requests.Session()
     tokens = authenticate(session)
 
-    payload_counters = {
-        "BtnCounters": "Counters",
-        **tokens
-    }
+    payload_counters = {"BtnCounters": "Counters", **tokens}
     response_counters = session.post(URL, data=payload_counters, timeout=10)
     tokens_counters = get_tokens(response_counters.text)
 
@@ -93,7 +88,7 @@ def get_lockers_amount():
         "__EVENTTARGET": "__Page",
         "__EVENTARGUMENT": "PBArg",
         "TxtIncomming": "0",
-        **tokens_counters
+        **tokens_counters,
     }
     response_incomming = session.post(URL, data=payload_incomming, timeout=10)
     tokens_incomming = get_tokens(response_incomming.text)
@@ -101,7 +96,7 @@ def get_lockers_amount():
     payload = {
         "monthList": f"{datetime.now():%m/%Y}",
         "BtnGetCounterRecords": "Get Incoming",
-        **tokens_incomming
+        **tokens_incomming,
     }
 
     response = session.post(URL, data=payload, timeout=10)
