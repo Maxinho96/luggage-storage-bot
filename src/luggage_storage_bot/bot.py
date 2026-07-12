@@ -1,4 +1,6 @@
 import os
+from calendar import monthrange
+from datetime import datetime
 
 from telegram.ext import Updater
 
@@ -62,6 +64,11 @@ def check_lockers_amount(bot, job):
             trend_emoji = "📈" if delta > 0 else "📉" if delta < 0 else "➖"
             trend_line = f"\n{trend_emoji} Variazione: {delta:.2f} €"
             amount_line += trend_line
+
+        _, total_days_of_month = monthrange(datetime.now().year, datetime.now().month)
+        average_daily_amount = current_lockers_amount / datetime.now().day
+        projected_monthly_amount = average_daily_amount * total_days_of_month
+        amount_line += f"\n📅 Media giornaliera: {average_daily_amount:.2f} €\n📽️ Proiezione mensile: {projected_monthly_amount:.2f} €"
 
         message = f"Incassi aggiornati\n{amount_line}"
         bot.send_message(chat_id=ANNA_ID, text=message)
